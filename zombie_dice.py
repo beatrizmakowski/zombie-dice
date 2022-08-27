@@ -1,246 +1,309 @@
 '''
-Implementação em Python do jogo Zombie Dice.
-Aluna: Beatriz Makowski
-Arquivo criado em 07/08/2022
-Última alteração: 22/08/2022.
+Implementação em Python do jogo Zombie dados.
+Aluna: Beatriz Makowski (RA 1112022201591)
+Arquivo criado em: 07/08/2022
+Última alteração:  27/08/2022
 '''
 
 import os
-from pickle import FALSE
 import random
-from re import I
-import time
-
-# Global variables
-NUMBER_OF_PĹAYERS = 0
-CURRENT_PLAYER = 0
-PLAYERS = []
-WINNER = None
-ALL_DICE = ['CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', # 6 dados verdes 
-            'TPCTPC', 'TPCTPC', 'TPCTPC','TPCTPC',                      # 4 dados amarelos
-            'TPTCPT', 'TPTCPT', 'TPTCPT']                               # 3 dados vermelhos
-AVAILABLE_DICE = ALL_DICE   # Var. global sem os dados que já foram sorteados na jogada atual
-
-class format:
-    # Fonte: https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
-    BOLD = '\033[1m'
-    HEADER = '\033[95m'
-    NORMAL = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    END_FORMATTING = '\033[0m'
-
-class Player:
-    def __init__(self, number, name) -> None:
-        self.number = number
-        self.name = name
-        self.score = 0
-        self.brains = 0
-        self.shots = 0
-        self.footprints = 0
-
-# Custom functions
-clear = lambda: os.system('clear')
 
 
-def customPrint(text, type=format.NORMAL, bold=False):
-    font_weight = format.BOLD if bold == True else ''
-    print(f'{font_weight}{type}{text}{format.END_FORMATTING}')
+# <--- Variáveis globais --->
+
+NUMERO_DE_JOGADORES = 0
+JOGADOR_ATUAL = 0
+VENCEDOR = None
+
+''' Lista para armazenar os jogadores '''
+JOGADORES = []
+
+'''  Lista para representar o tubo onde onde serão colocados os treze dados inicialmente '''
+TODOS_OS_DADOS = [
+                    'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', # 6 dados verdes 
+                    'TPCTPC', 'TPCTPC', 'TPCTPC','TPCTPC',                      # 4 dados amarelos
+                    'TPTCPT', 'TPTCPT', 'TPTCPT'                                # 3 dados vermelhos
+                ]
+
+'''  Lista que será manipulada para desconsiderar os dados já sorteados na jogada atual '''
+DADOS_DISPONIVEIS = TODOS_OS_DADOS
 
 
-def get_number_of_players():
-    global NUMBER_OF_PĹAYERS
+# <--- Classes personalizadas --->
+
+class Format:
+    '''
+    Classe criada para facilitar a Formatação do texto no terminal.
+    Fonte: https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+    '''
+    NEGRITO = '\033[1m'
+    ROSA = '\033[95m'  # Rosa
+    VERDE = '\033[92m'  # Verde
+    AMARELO = '\033[93m' # Amarelo
+    VERMELHO = '\033[91m'    # Vermelho
+    END = '\033[0m'
+
+
+class Jogador:
+    ''' Classe criada para facilitar o controle das informações dos jogadores '''
+    def __init__(self, numero, nome) -> None:
+        self.numero = numero
+        self.nome = nome
+        self.pontos = 0
+        self.cerebros = 0
+        self.tiros = 0
+        self.pegadas = 0
+
+    def resetar_cerebros_tiros_pegadas(self):
+        self.cerebros = 0
+        self.tiros = 0
+        self.pegadas = 0
+
+
+# <--- Funções personalizadas --->
+
+''' Limpa a tela do terminal '''
+clear = lambda: os.system('cls')
+
+
+def customPrint(text, type='', NEGRITO=False):
+    ''' Função que facilita a customização do texto impresso no terminal '''
+    font_weight = Format.NEGRITO if NEGRITO == True else ''
+    print(f'{font_weight}{type}{text}{Format.END}')
+
+
+def obter_numero_de_jogadores():
+    ''' Pergunta ao usuário o número de jogadores, repetindo até que o input seja um número maior ou igual a 2 '''
+    global NUMERO_DE_JOGADORES
     while True:
         try:
-            NUMBER_OF_PĹAYERS = int(input(f'{format.NORMAL}\nQuantas pessoas irão jogar? {format.END_FORMATTING}'))
+            NUMERO_DE_JOGADORES = int(input(f'{Format.NEGRITO}{Format.ROSA}\n'
+                                            f'Quantas pessoas irão jogar? '
+                                            f'{Format.END}'))
         except ValueError:
-            customPrint('Não entendi... (╥_╥) Por favor, digite apenas números inteiros.', type=format.WARNING)
+            customPrint('Não entendi... (╥_╥) Por favor, digite apenas números inteiros.',
+                        type=Format.AMARELO)
         else: 
-            if NUMBER_OF_PĹAYERS >= 2:
+            if NUMERO_DE_JOGADORES >= 2:
                 break
-            customPrint('O número mínimo de jogadores é 2!', type=format.WARNING)
+            customPrint('O número mínimo de jogadores é 2!', type=Format.AMARELO)
 
 
-def get_players_names():
-    for i in range(NUMBER_OF_PĹAYERS):
-        try:
-            name = input(f'{format.BOLD}{format.NORMAL}Digite o nome do jogador {i + 1}: {format.END_FORMATTING}')
-        except:
-            customPrint('Não entendi... (╥_╥) Por favor, digite novamente.', type=format.WARNING)
-        else:
-            newPlayer = Player(i + 1, name)
-            PLAYERS.append(newPlayer)
+def obter_nomes_dos_jogadores():
+    ''' Pergunta ao usuário o número de jogadores, repetindo até que o input seja uma string válida '''
+    for i in range(NUMERO_DE_JOGADORES):
+        while True:
+            try:
+                nome = input(f'{Format.NEGRITO}{Format.ROSA}'
+                             f'Digite o nome do jogador {i + 1}: '
+                             f'{Format.END}').title()
+            except:
+                customPrint('Não entendi... (╥_╥) Por favor, digite novamente.', type=Format.AMARELO)
+            else:
+                novoJogador = Jogador(i + 1, nome)
+                JOGADORES.append(novoJogador)
+                break
 
 
-def draw_dice(number_of_draws):
-    global AVAILABLE_DICE
-    dice = []
-    number_of_green_dice = number_of_yellow_dice = number_of_red_dice = 0
-    plural_green_dice = plural_yellow_dice = plural_red_dice = ''
+def sortear_dados(numero_de_sorteios):
+    ''' Usa a biblioteca random para sortear dados dentre as opções disponíveis na variável global DADOS_DISPONIVEIS
+    Imprime no terminal quantos dados de cada cor foram sorteados.
+    '''
+    global DADOS_DISPONIVEIS
+    dados = []
+    numero_de_dados_verdes = numero_de_dados_amarelos = numero_de_dados_vermelhos = 0
+    plural_dados_verdes = plural_dados_amarelos = plural_dados_vermelhos = ''
 
-    customPrint('Sorteando dados...', )
+    customPrint('\nSorteando dados...')
 
-    for i in range(number_of_draws):
-        die = random.choice(AVAILABLE_DICE)
-        dice.append(die)
-        if die == 'CPCTPC':
-            number_of_green_dice += 1
-        elif die == 'TPCTPC':
-            number_of_yellow_dice += 1
-        elif die == 'TPTCPT':
-            number_of_red_dice += 1
+    for _ in range(numero_de_sorteios):
 
-    if number_of_green_dice > 1:
-        plural_green_dice = 's'
-    elif number_of_green_dice == 0:
-        number_of_green_dice = 'nenhum'
+        dado = random.choice(DADOS_DISPONIVEIS)
+        dados.append(dado)
 
-    if number_of_yellow_dice > 1:
-        plural_yellow_dice = 's'
-    elif number_of_yellow_dice == 0:
-        number_of_yellow_dice = 'nenhum'
+        if dado == 'CPCTPC':
+            numero_de_dados_verdes += 1
+        elif dado == 'TPCTPC':
+            numero_de_dados_amarelos += 1
+        elif dado == 'TPTCPT':
+            numero_de_dados_vermelhos += 1
 
-    if number_of_red_dice > 1:
-        plural_red_dice = 's'
-    elif number_of_red_dice == 0:
-        number_of_red_dice = 'nenhum'
+    if numero_de_dados_verdes > 1:
+        plural_dados_verdes = 's'
+    elif numero_de_dados_verdes == 0:
+        numero_de_dados_verdes = 'nenhum'
 
-    customPrint(f'Foram sorteados {number_of_green_dice} dado{plural_green_dice} verde{plural_green_dice}, '
-                f'{number_of_yellow_dice} dado{plural_yellow_dice} amarelo{plural_yellow_dice} e '
-                f'{number_of_red_dice} dado{plural_red_dice} vermelho{plural_red_dice}.')
+    if numero_de_dados_amarelos > 1:
+        plural_dados_amarelos = 's'
+    elif numero_de_dados_amarelos == 0:
+        numero_de_dados_amarelos = 'nenhum'
+
+    if numero_de_dados_vermelhos > 1:
+        plural_dados_vermelhos = 's'
+    elif numero_de_dados_vermelhos == 0:
+        numero_de_dados_vermelhos = 'nenhum'
+
+    customPrint(f'\nForam sorteados {Format.NEGRITO}{Format.VERDE}{numero_de_dados_verdes} dado{plural_dados_verdes} verde{plural_dados_verdes}{Format.END}, '
+                f'{Format.NEGRITO}{Format.AMARELO}{numero_de_dados_amarelos} dado{plural_dados_amarelos} amarelo{plural_dados_amarelos}{Format.END} e '
+                f'{Format.NEGRITO}{Format.VERMELHO}{numero_de_dados_vermelhos} dado{plural_dados_vermelhos} vermelho{plural_dados_vermelhos}{Format.END}.')
     
-    roll_dice(dice)
+    input(f'{Format.ROSA}\n[Pressione qualquer tecla para rolar os dados]{Format.END}')
+
+    jogar_dados(dados)
 
 
-def roll_dice(dice):
-    global AVAILABLE_DICE
-    global PLAYERS
-    colors = []
-    results = []
+def jogar_dados(dados):
+    ''' Usa a biblioteca random para sortear uma face de cada dado sorteado pela função sortear_dados()
+    Atualiza as informações do jogador atual
+    '''
+    global DADOS_DISPONIVEIS
+    global JOGADORES
+    cores = []
+    resultados = []
 
-    customPrint('Rolando dados...', )
+    clear()
+    customPrint('\nRolando os dados...\n')
 
-    for die in dice:
+    for dado in dados:
 
-        if die == 'CPCTPC':
-            colors.append(format.NORMAL)
-        elif die == 'TPCTPC':
-            colors.append(format.WARNING)
-        else:
-            colors.append(format.FAIL)
+        if dado == 'CPCTPC': # Dado verde
+            cores.append(Format.VERDE)
+        elif dado == 'TPCTPC': # Dado amarelo
+            cores.append(Format.AMARELO)
+        else: # Dado vermelho
+            cores.append(Format.VERMELHO)
 
-        result = random.choice(die)
-        results.append(result)
+        resultado = random.choice(dado)
+        resultados.append(resultado)
 
-        if result == 'P':
-            PLAYERS[CURRENT_PLAYER].footprints += 1
-            AVAILABLE_DICE.append(die) # Os dados [P] podem ser sorteados novamente se o jogador quiser continuar
-        elif result == 'C':
-            PLAYERS[CURRENT_PLAYER].brains += 1
-        elif result == 'T':
-            PLAYERS[CURRENT_PLAYER].shots += 1
+        if resultado == 'P': # [P] = pegadas
+            JOGADORES[JOGADOR_ATUAL].pegadas += 1
+            DADOS_DISPONIVEIS.append(dado) # Os dados [P] podem ser sorteados novamente se o jogador quiser continuar
+        elif resultado == 'C': # [C] = cérebros
+            JOGADORES[JOGADOR_ATUAL].cerebros += 1
+        elif resultado == 'T': # [T] = tiros
+            JOGADORES[JOGADOR_ATUAL].tiros += 1
     
-    print_rolled_dice(colors, results)
+    imprimir_dados_jogados(cores, resultados)
 
 
-def print_rolled_dice(colors, results):
-    for i in range(len(results)):
-        print(f'{colors[i]} ———  {format.END_FORMATTING}', end='')
-    print('\n', end='')
-    for i in range(len(results)):
-        print(f'{colors[i]}| {results[i]} | {format.END_FORMATTING}', end='')
-    print('\n', end='')
-    for i in range(len(results)):
-        print(f'{colors[i]} ———  {format.END_FORMATTING}', end='')
+def imprimir_dados_jogados(cores, resultados):
+    ''' Imprime no terminal as faces sorteadas de cada dado, com as cores correspondentes '''
+
+    for i in range(len(resultados)):
+        print(f'{Format.NEGRITO}{cores[i]} ———  {Format.END}', end='')
     print('\n', end='')
 
+    for i in range(len(resultados)):
+        print(f'{Format.NEGRITO}{cores[i]}| {resultados[i]} | {Format.END}', end='')
+    print('\n', end='')
 
-def confirm_if_player_will_continue():
+    for i in range(len(resultados)):
+        print(f'{Format.NEGRITO}{cores[i]} ———  {Format.END}', end='')
+    print('\n', end='')
+
+
+def confirmar_se_jogador_quer_continuar():
+    ''' Pergunta ao jogador se ele quer continuar a jogar ou encerrar a rodada, 
+    repetindo até que o input seja uma string válida.
+    '''
+
     while True:
-        answer = input(f'{format.BOLD}{format.NORMAL}\n'
+        resposta = input(f'{Format.NEGRITO}{Format.ROSA}\n'
                        f'Você deseja continuar a rodada? Digite "S" ou "N": '
-                       f'{format.END_FORMATTING}').upper()
-        if answer == 'S':
+                       f'{Format.END}').upper()
+        if resposta == 'S':
             return True
-        elif answer == 'N':
+        elif resposta == 'N':
             return False
         else:
-            customPrint('Hum, não entendi... (╥_╥) Por favor, digite novamente.', type=format.WARNING)
+            customPrint('Hum, não entendi... (╥_╥) Por favor, digite novamente.', type=Format.AMARELO)
 
 
-def print_scoreboard():
-    global WINNER
-    customPrint(f'\nScoreboard:', bold=True)
-    for j in range(NUMBER_OF_PĹAYERS):
-        customPrint(f'{PLAYERS[j].name}: {PLAYERS[j].score}')
-        if PLAYERS[j].score >= 13:
-            WINNER = PLAYERS[j]
-    if WINNER:
-        end_the_game()
+def imprimir_placar():
+    ''' Imprime no terminal o placar de pontos atual.
+    Verifica se há um vencedor (jogador com 13 pontos ou mais)
+    Caso sim, chama a função de encerrar o jogo.
+    '''
+    
+    global VENCEDOR
+    customPrint('\nPlacar:')
+
+    for j in range(NUMERO_DE_JOGADORES):
+        customPrint(f'{JOGADORES[j].nome}: {JOGADORES[j].pontos}')
+
+        if JOGADORES[j].pontos >= 13:
+            VENCEDOR = JOGADORES[j]
+
+    if VENCEDOR:
+        encerrar_o_jogo()
 
 
-def end_the_game():
-    customPrint(f'\nWow! {WINNER.name} ganhou o jogo com {WINNER.score} pontos! \(•◡•)/', type=format.HEADER, bold=True)
-    input(f'{format.HEADER}Pressione qualquer tecla para encerrar o jogo.\n{format.END_FORMATTING}')
+def encerrar_o_jogo():
+    ''' Imprime a mensagem de encerramento e encerra a execução do programa '''
+
+    customPrint(f'\nUau! {VENCEDOR.nome} ganhou o jogo com {VENCEDOR.pontos} pontos! \(•◡•)/', type=Format.ROSA, NEGRITO=True)
+    input(f'{Format.ROSA}\n[Pressione qualquer tecla para encerrar o jogo]\n{Format.END}')
     quit()
 
 
-# Main
+# <--- Main --->
+
 clear()
-customPrint('** Bem vindo(a) ao jogo Zombie Dice! \(•◡•)/ **', type=format.HEADER, bold=True)
-customPrint('Pressione Ctrl+Z a qualquer momento para sair do jogo.', type=format.HEADER)
+customPrint('** Bem vindo(a) ao jogo Zombie dados! \(•◡•)/ **', type=Format.ROSA, NEGRITO=True)
+customPrint('[Pressione Ctrl+Z a qualquer momento para sair do jogo]', type=Format.ROSA)
 
-get_number_of_players()
-get_players_names()
+obter_numero_de_jogadores()
+obter_nomes_dos_jogadores()
 
-customPrint('Começando uma nova partida! \(•◡•)/', type=format.HEADER, bold=True)
-winner = False
+clear()
+customPrint('\nComeçando uma nova partida! \(•◡•)/', type=Format.ROSA, NEGRITO=True)
 
 while True:
-    for i in range(NUMBER_OF_PĹAYERS):
-        CURRENT_PLAYER = i
-        player_will_continue = True
+    for i in range(NUMERO_DE_JOGADORES):
+        JOGADOR_ATUAL = i
+        jogador_quer_continuar = True
 
-        print_scoreboard()
+        imprimir_placar()
         
-        customPrint(f'\n{PLAYERS[i].name}, é a sua vez!\n', bold=True)
-        input(f'{format.NORMAL}Pressione qualquer tecla para continuar.\n{format.END_FORMATTING}')
-        number_of_dice_to_draw = 3
+        customPrint(f'\n{JOGADORES[i].nome}, é a sua vez!\n', NEGRITO=True, type=Format.ROSA)
+        DADOS_DISPONIVEIS = TODOS_OS_DADOS
+        input(f'{Format.ROSA}[Pressione qualquer tecla sortear os dados]\n{Format.END}')
+        numero_de_dados_para_sortear = 3
         clear()
 
-        while player_will_continue:
-            plural_points = plural_shots = ''
+        while jogador_quer_continuar:
+            plural_pontos = plural_tiros = ''
 
-            draw_dice(number_of_dice_to_draw)
+            sortear_dados(numero_de_dados_para_sortear)
 
-            customPrint(f'\nSeu score atual é:')
+            customPrint(f'\nSua pontuação atual é: \n')
             customPrint(f'{"Cérebros":^10}|{"Pegadas":^10}|{"Tiros":^10}')
-            customPrint(f'{PLAYERS[i].brains:^10}|{PLAYERS[i].footprints:^10}|{PLAYERS[i].shots:^10}')
+            customPrint(f'{JOGADORES[i].cerebros:^10}|{JOGADORES[i].pegadas:^10}|{JOGADORES[i].tiros:^10}')
 
-            if PLAYERS[i].shots >= 3:
-                customPrint(f'\nAh não! Você levou {PLAYERS[i].shots} tiros e perdeu todos os pontos acumulados nesta '
-                            f'rodada! (╥_╥)', bold=True, type=format.FAIL)
-                PLAYERS[i].brains = 0
-                player_will_continue = False
+            if JOGADORES[i].tiros >= 3:
+                customPrint(f'\nAh não! Você levou {JOGADORES[i].tiros} tiros e perdeu todos os pontos acumulados nesta '
+                            f'rodada! (╥_╥)', NEGRITO=True, type=Format.VERMELHO)           
+                JOGADORES[i].cerebros = 0
+                jogador_quer_continuar = False
+                input(f'{Format.ROSA}\n[Pressione qualquer tecla para continuar]\n{Format.END}')
+                clear()
                 continue
             
-            if PLAYERS[i].brains > 1:
-                plural_points = 's'
-            if 3 - PLAYERS[i].shots > 1:
-                plural_shots = 's'
+            if JOGADORES[i].cerebros > 1:
+                plural_pontos = 's'
+            if 3 - JOGADORES[i].tiros > 1:
+                plural_tiros = 's'
 
-            customPrint(f'\nVocê pode encerrar esta rodada e ganhar {PLAYERS[i].brains} ponto{plural_points} ou sortear '
-                        f'mais 3 dados e tentar aumentar seu score!')
-            customPrint(f'Porém, se você levar mais {3 - PLAYERS[i].shots} tiro{plural_shots}, sua vez acabará e você '
-                        f'perderá todos os pontos que acumulou até agora...')
-            
-            number_of_dice_to_draw = 3 - PLAYERS[i].footprints
-            PLAYERS[i].footprints = 0
+            customPrint(f'\nVocê pode encerrar esta rodada e ganhar '
+                        f'{Format.NEGRITO}{Format.VERDE}{JOGADORES[i].cerebros} ponto{plural_pontos}{Format.END} '
+                        f'ou jogar novamente e tentar aumentar seu pontos!')
+            customPrint(f'Porém, se você levar mais '
+                        f'{Format.NEGRITO}{Format.VERMELHO}{3 - JOGADORES[i].tiros} tiro{plural_tiros}{Format.END}, '
+                        f'sua vez acabará e você perderá todos os pontos que acumulou até agora...')
 
-            player_will_continue = confirm_if_player_will_continue()
+            jogador_quer_continuar = confirmar_se_jogador_quer_continuar()
             clear()
         
-        PLAYERS[i].score += PLAYERS[i].brains
-        PLAYERS[i].brains = 0
-        PLAYERS[i].footprints = 0
-        PLAYERS[i].shots = 0
+        JOGADORES[i].pontos += JOGADORES[i].cerebros
+        JOGADORES[i].resetar_cerebros_tiros_pegadas()
