@@ -1,8 +1,9 @@
 '''
-Implementação em Python do jogo Zombie dados.
+Implementação em Python do jogo Zombie Dice.
 Aluna: Beatriz Makowski (RA 1112022201591)
+Curso: Superior de Tecnologia em Análise de Desenvolvimento de Sistemas
 Arquivo criado em: 07/08/2022
-Última alteração:  27/08/2022
+Última alteração: 27/08/2022
 '''
 
 import os
@@ -19,11 +20,10 @@ VENCEDOR = None
 JOGADORES = []
 
 '''  Lista para representar o tubo onde onde serão colocados os treze dados inicialmente '''
-TODOS_OS_DADOS = [
-                    'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', # 6 dados verdes 
-                    'TPCTPC', 'TPCTPC', 'TPCTPC','TPCTPC',                      # 4 dados amarelos
-                    'TPTCPT', 'TPTCPT', 'TPTCPT'                                # 3 dados vermelhos
-                ]
+TODOS_OS_DADOS = ['CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', 'CPCTPC', # 6 dados verdes 
+                  'TPCTPC', 'TPCTPC', 'TPCTPC','TPCTPC', # 4 dados amarelos
+                  'TPTCPT', 'TPTCPT', 'TPTCPT'] # 3 dados vermelhos
+                
 
 '''  Lista que será manipulada para desconsiderar os dados já sorteados na jogada atual '''
 DADOS_DISPONIVEIS = TODOS_OS_DADOS
@@ -37,15 +37,16 @@ class Format:
     Fonte: https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
     '''
     NEGRITO = '\033[1m'
-    ROSA = '\033[95m'  # Rosa
-    VERDE = '\033[92m'  # Verde
-    AMARELO = '\033[93m' # Amarelo
-    VERMELHO = '\033[91m'    # Vermelho
+    ROSA = '\033[95m'
+    VERDE = '\033[92m'
+    AMARELO = '\033[93m'
+    VERMELHO = '\033[91m'
     END = '\033[0m'
 
 
 class Jogador:
     ''' Classe criada para facilitar o controle das informações dos jogadores '''
+
     def __init__(self, numero, nome) -> None:
         self.numero = numero
         self.nome = nome
@@ -68,12 +69,14 @@ clear = lambda: os.system('cls')
 
 def customPrint(text, type='', NEGRITO=False):
     ''' Função que facilita a customização do texto impresso no terminal '''
+
     font_weight = Format.NEGRITO if NEGRITO == True else ''
     print(f'{font_weight}{type}{text}{Format.END}')
 
 
 def obter_numero_de_jogadores():
     ''' Pergunta ao usuário o número de jogadores, repetindo até que o input seja um número maior ou igual a 2 '''
+
     global NUMERO_DE_JOGADORES
     while True:
         try:
@@ -91,6 +94,7 @@ def obter_numero_de_jogadores():
 
 def obter_nomes_dos_jogadores():
     ''' Pergunta ao usuário o número de jogadores, repetindo até que o input seja uma string válida '''
+
     for i in range(NUMERO_DE_JOGADORES):
         while True:
             try:
@@ -109,6 +113,7 @@ def sortear_dados(numero_de_sorteios):
     ''' Usa a biblioteca random para sortear dados dentre as opções disponíveis na variável global DADOS_DISPONIVEIS
     Imprime no terminal quantos dados de cada cor foram sorteados.
     '''
+    
     global DADOS_DISPONIVEIS
     dados = []
     numero_de_dados_verdes = numero_de_dados_amarelos = numero_de_dados_vermelhos = 0
