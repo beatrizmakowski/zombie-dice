@@ -2,6 +2,7 @@
 
 Repositório criado para armazenar os códigos desenvolvidos para a **Atividade Somativa 1** da matéria **Raciocínio Computacional** do curso Superior de Tecnologia em Análise de Desenvolvimento de Sistemas da PUCPR.
 
+Aluna: Beatriz Makowski - RA 1112022201591
 
 ## 🎯 Objetivo
 
@@ -36,7 +37,7 @@ As instruções serão impressas em texto na tela do terminal. O usuário intera
 
 ## 👀 Preview
 
-
+![Animação](https://user-images.githubusercontent.com/86008015/187048166-6d4f43a1-820a-47f1-8b71-98e2cf446cfc.gif)
 
 ## 👩‍💻 Autora
 
