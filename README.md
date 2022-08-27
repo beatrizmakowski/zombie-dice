@@ -39,6 +39,8 @@ As instruções serão impressas em texto na tela do terminal. O usuário intera
 
 ![Animação](https://user-images.githubusercontent.com/86008015/187048166-6d4f43a1-820a-47f1-8b71-98e2cf446cfc.gif)
 
+Gif criado utilizando o projeto brasileiro open source [ScreenToGif](https://github.com/NickeManarin/ScreenToGif/)
+
 ## 👩‍💻 Autora
 
 Feito por **Beatriz Makowski**. Entre em contato! 👇
