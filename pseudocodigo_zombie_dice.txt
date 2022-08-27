@@ -1,0 +1,22 @@
+1.  Usuário deve informar a quantidade de jogadores
+2.  Usuário deve informar o nome dos jogadores
+3.  O programa deve iterar sobre os jogadores e para cada jogada deve
+    repetir os passos de 4 a 11
+    4.  O programa deve verificar se algum jogador atingiu a condição
+        de vitória (13 pontos ou mais)
+        5.1  Caso sim, encerra o jogo
+        5.2  Caso não, continua a rodada
+    6.  O programa deve sortear 3 dados
+    7.  O programa deve sortear uma face de cada um dos 3 dados sor-
+        teados na etapa anterior
+    8.  O programa deve somar os resultados de cérebros, pegadas e
+        tiros conforme as faces sorteadas na etapa anterior
+    9.  O programava deve verificar se o jogador atual levou 3 ou 
+        mais tiros
+        10.1  Caso sim, o programa deve passar para a rodada do pró-
+              ximo jogador sem somar pontos para o jogador atual
+        10.2  Caso não, o programa deve perguntar se o jogador atual
+              deseja continuar a rodada
+            11.1 Caso sim, passa para o passo 6 com o jogador atual
+            11.2 Caso não, soma os pontos do jogador atual e passa 
+                 para o passo 4 com o próximo jogador
