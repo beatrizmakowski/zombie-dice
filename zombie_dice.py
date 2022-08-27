@@ -1,9 +1,11 @@
 '''
-Implementação em Python do jogo Zombie Dice.
+Implementação em Python do jogo Zombie Dice
 Aluna: Beatriz Makowski (RA 1112022201591)
 Curso: Superior de Tecnologia em Análise de Desenvolvimento de Sistemas
 Arquivo criado em: 07/08/2022
 Última alteração: 27/08/2022
+
+Readme disponível em: https://github.com/beatrizmakowski/zombie-dice#readme
 '''
 
 import os
@@ -113,7 +115,7 @@ def sortear_dados(numero_de_sorteios):
     ''' Usa a biblioteca random para sortear dados dentre as opções disponíveis na variável global DADOS_DISPONIVEIS
     Imprime no terminal quantos dados de cada cor foram sorteados.
     '''
-    
+
     global DADOS_DISPONIVEIS
     dados = []
     numero_de_dados_verdes = numero_de_dados_amarelos = numero_de_dados_vermelhos = 0
