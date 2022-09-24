@@ -14,7 +14,7 @@ import random
 
 # <--- Variáveis globais --->
 
-numero_de_joagores = 0
+numero_de_jogadores = 0
 jogador_atual = 0
 vencedor = None
 jogador = [] # Lista para armazenar os jogadores
@@ -36,8 +36,8 @@ def inicializar_copo_dados():
     for _ in range(3):
         copo_dados.append(dado_vermelho)
 
-'''  Lista para representar o copo onde onde serão colocados os treze dados inicialmente '''
-copo_dados = []
+
+copo_dados = [] # Lista para representar o copo onde onde serão colocados os treze dados inicialmente
 inicializar_copo_dados()       
 dados_disponiveis = copo_dados # Lista que será manipulada para desconsiderar os dados já sorteados na jogada atual
 
@@ -75,6 +75,7 @@ class Jogador:
 
 
 class CopoVazio(Exception):
+    '''Exceção customizada que é 'raised' quando a quantidade de dados no copo [len(dados_disponiveis)] é zero'''
     pass
 
 
@@ -91,28 +92,28 @@ def customPrint(text, type='', NEGRITO=False):
     print(f'{font_weight}{type}{text}{Format.END}')
 
 
-def obter_numero_de_joagores():
+def obter_numero_de_jogadores():
     ''' Pergunta ao usuário o número de jogador, repetindo até que o input seja um número maior ou igual a 2 '''
 
-    global numero_de_joagores
+    global numero_de_jogadores
     while True:
         try:
-            numero_de_joagores = int(input(f'{Format.NEGRITO}{Format.ROSA}\n'
+            numero_de_jogadores = int(input(f'{Format.NEGRITO}{Format.ROSA}\n'
                                             f'Quantas pessoas irão jogar? '
                                             f'{Format.END}'))
         except ValueError:
             customPrint('Não entendi... (╥_╥) Por favor, digite apenas números inteiros.',
                         type=Format.AMARELO)
         else: 
-            if numero_de_joagores >= 2:
+            if numero_de_jogadores >= 2:
                 break
             customPrint('O número mínimo de jogador é 2!', type=Format.AMARELO)
 
 
-def obter_nomes_dos_jogador():
+def obter_nomes_dos_jogadores():
     ''' Pergunta ao usuário o número de jogador, repetindo até que o input seja uma string válida '''
 
-    for i in range(numero_de_joagores):
+    for i in range(numero_de_jogadores):
         while True:
             try:
                 nome = input(f'{Format.NEGRITO}{Format.ROSA}'
@@ -271,7 +272,7 @@ def imprimir_dados_jogados(cores, resultados):
     print('\n', end='')
 
 
-def confirmar_se_jogador_quer_continuar():
+def confirmar_se_jogador_atual_quer_continuar():
     ''' Pergunta ao jogador se ele quer continuar a jogar ou encerrar a rodada, 
     repetindo até que o input seja uma string válida.
     '''
@@ -288,6 +289,12 @@ def confirmar_se_jogador_quer_continuar():
             customPrint('Hum, não entendi... (╥_╥) Por favor, digite novamente.', type=Format.AMARELO)
 
 
+def imprimir_pontuacao_do_jogador_atual(i):
+    customPrint(f'\nSua pontuação atual é: \n')
+    customPrint(f'{"Cérebros":^10}|{"Pegadas":^10}|{"Tiros":^10}')
+    customPrint(f'{jogador[i].cerebros:^10}|{jogador[i].pegadas:^10}|{jogador[i].tiros:^10}')
+
+
 def imprimir_placar():
     ''' Imprime no terminal o placar de pontos atual.
     Verifica se há um vencedor (jogador com 13 pontos ou mais)
@@ -301,7 +308,7 @@ def imprimir_placar():
     customPrint(f'{"Jogador":^10}|{"Pontos":^10}', NEGRITO=True)
     customPrint('-'*21)
 
-    for j in range(numero_de_joagores):
+    for j in range(numero_de_jogadores):
         customPrint(f'{jogador[j].nome:^10}| {jogador[j].pontos:^10}')
 
         if jogador[j].pontos >= 13:
@@ -325,16 +332,18 @@ clear()
 customPrint('** Bem vindo(a) ao jogo Zombie dados! \(•◡•)/ **', type=Format.ROSA, NEGRITO=True)
 customPrint('[Pressione Ctrl+Z a qualquer momento para sair do jogo]', type=Format.ROSA)
 
-obter_numero_de_joagores()
-obter_nomes_dos_jogador()
-
+obter_numero_de_jogadores()
+obter_nomes_dos_jogadores()
 clear()
+
 customPrint('\nComeçando uma nova partida! \(•◡•)/', type=Format.ROSA, NEGRITO=True)
 
 while True:
-    for i in range(numero_de_joagores):
+
+    for i in range(numero_de_jogadores):
+
         jogador_atual = i
-        jogador_quer_continuar = True
+        jogador_atual_quer_continuar = True
 
         imprimir_placar()
         
@@ -342,25 +351,24 @@ while True:
         input(f'{Format.ROSA}[Pressione qualquer tecla sortear os dados]\n{Format.END}')
         clear()
 
-        while jogador_quer_continuar:
+        while jogador_atual_quer_continuar:
+
             plural_pontos = plural_tiros = ''
 
             try:
                 sortear_dados(numero_de_dados_para_sortear)
             except CopoVazio:
-                jogador_quer_continuar = False
-                input(f'{Format.ROSA}\n[Passando a vez para o próximo jogador]\n{Format.END}')
+                input(f'{Format.ROSA}\nPassando a vez para o próximo jogador...\n{Format.END}')
+                jogador_atual_quer_continuar = False
                 continue
 
-            customPrint(f'\nSua pontuação atual é: \n')
-            customPrint(f'{"Cérebros":^10}|{"Pegadas":^10}|{"Tiros":^10}')
-            customPrint(f'{jogador[i].cerebros:^10}|{jogador[i].pegadas:^10}|{jogador[i].tiros:^10}')
+            imprimir_pontuacao_do_jogador_atual(i)
 
             if jogador[i].tiros >= 3:
                 customPrint(f'\nAh não! Você levou {jogador[i].tiros} tiros e perdeu todos os pontos acumulados nesta '
                             f'rodada! (╥_╥)', NEGRITO=True, type=Format.VERMELHO)           
                 jogador[i].cerebros = 0
-                jogador_quer_continuar = False
+                jogador_atual_quer_continuar = False
                 input(f'{Format.ROSA}\n[Pressione qualquer tecla para continuar]\n{Format.END}')
                 clear()
                 continue
@@ -377,7 +385,7 @@ while True:
                         f'{Format.NEGRITO}{Format.VERMELHO}{3 - jogador[i].tiros} tiro{plural_tiros}{Format.END}, '
                         f'sua vez acabará e você perderá todos os pontos que acumulou até agora...')
 
-            jogador_quer_continuar = confirmar_se_jogador_quer_continuar()
+            jogador_atual_quer_continuar = confirmar_se_jogador_atual_quer_continuar()
             clear()
         
         inicializar_copo_dados()
