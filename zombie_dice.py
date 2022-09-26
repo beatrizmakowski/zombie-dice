@@ -3,7 +3,7 @@ Implementação em Python do jogo Zombie Dice
 Aluna: Beatriz Makowski (RA 1112022201591)
 Curso: Superior de Tecnologia em Análise de Desenvolvimento de Sistemas
 Arquivo criado em: 07/08/2022
-Última alteração: 18/09/2022
+Última alteração: 26/09/2022
 
 Readme disponível em: https://github.com/beatrizmakowski/zombie-dice#readme
 '''
@@ -74,11 +74,6 @@ class Jogador:
         self.pegadas = 0
 
 
-class CopoVazio(Exception):
-    '''Exceção customizada que é 'raised' quando a quantidade de dados no copo [len(dados_disponiveis)] é zero'''
-    pass
-
-
 # <--- Funções personalizadas --->
 
 ''' Limpa a tela do terminal '''
@@ -90,6 +85,11 @@ def customPrint(text, type='', NEGRITO=False):
 
     font_weight = Format.NEGRITO if NEGRITO == True else ''
     print(f'{font_weight}{type}{text}{Format.END}')
+
+
+class CopoVazio(Exception):
+    '''Exceção customizada que é 'raised' quando a quantidade de dados no copo é zero'''
+    customPrint(f'\nO copo está vazio!', NEGRITO=True, type=Format.VERMELHO) 
 
 
 def obter_numero_de_jogadores():
@@ -169,7 +169,6 @@ def sortear_dados(numero_de_sorteios):
     global copo_dados
 
     if len(copo_dados) == 0:
-        customPrint(f'\nO copo está vazio!', NEGRITO=True, type=Format.VERMELHO) 
         raise CopoVazio
     elif len(copo_dados) < 3:
         numero_de_sorteios = len(copo_dados)
